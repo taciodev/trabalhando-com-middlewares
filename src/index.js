@@ -23,7 +23,13 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+
+  if (user.pro || user.pro && user.todos.length >= 10) {
+    return response.status(403).json({ error: "Customer is prohibited from accessing" });
+  }
+
+  next();
 }
 
 function checksTodoExists(request, response, next) {
@@ -31,7 +37,16 @@ function checksTodoExists(request, response, next) {
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find((user) => user.id === id);
+
+  if (!user) {
+    return response.status(404).json({ error: "Does not exist" });
+  }
+
+  request.user = user;
+  next();
 }
 
 app.post('/users', (request, response) => {
