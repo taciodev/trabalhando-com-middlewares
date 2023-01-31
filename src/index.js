@@ -25,7 +25,7 @@ function checksExistsUserAccount(request, response, next) {
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
 
-  if (user.pro || user.pro && user.todos.length >= 10) {
+  if (user.pro && user.todos.length >= 10) {
     return response.status(403).json({ error: "Customer is prohibited from accessing" });
   }
 
@@ -33,7 +33,28 @@ function checksCreateTodosUserAvailability(request, response, next) {
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.header;
+  const { id } = request.params;
+
+  const user = users.find((user) => user.username === username);
+
+  if (!user) {
+    return response.status(404).json({ error: "User does not exist" });
+  }
+
+  if (!validate(id)) {
+    return response.status(400).json({ error: "UUID invalid" });
+  }
+
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if (!todo) {
+    return response.status(404).json({ error: "Todo does not exist" });
+  }
+
+  request.user = user;
+  request.todo = todo;
+  next();
 }
 
 function findUserById(request, response, next) {
